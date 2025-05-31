@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Counter</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk1pbmltYWxpc3QgQ291bnRlciIsCiAgInNob3J0X25hbWUiOiAiQ291bnRlciIsCiAgImRlc2NyaXB0aW9uIjogIkEgbWluaW1hbGlzdCBjb3VudGVyIGFwcCIsCiAgInN0YXJ0X3VybCI6ICIuLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIiMwMDAwMDAiLAogICJpY29ucyI6IFtdCn0=">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --primary-light: #60A5FA;
+            --accent: #06B6D4;
+            --accent-dark: #0891B2;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --neutral-50: #F9FAFB;
+            --neutral-100: #F3F4F6;
+            --neutral-200: #E5E7EB;
+            --neutral-300: #D1D5DB;
+            --neutral-400: #9CA3AF;
+            --neutral-500: #6B7280;
+            --neutral-600: #4B5563;
+            --neutral-700: #374151;
+            --neutral-800: #1F2937;
+            --neutral-900: #111827;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.05), 0 4px 6px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--neutral-50);
+            color: var(--neutral-900);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 24px 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--neutral-900);
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+
+        .language-selector {
+            width: 130px;
+            min-width: unset;
+            max-width: 160px;
+            padding: 8px 28px 8px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--neutral-900);
+            cursor: pointer;
+            background-color: var(--neutral-100);
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-md);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            transition: var(--transition);
+        }
+
+        .language-selector:hover {
+            background-color: var(--neutral-200);
+            border-color: var(--neutral-300);
+        }
+
+        .language-selector:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 24px;
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-md);
+            padding: 6px;
+            position: relative;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--neutral-600);
+            transition: var(--transition);
+            z-index: 1;
+        }
+
+        .tab.active {
+            color: var(--neutral-900);
+        }
+
+        /* Animated slider for active tab */
+        .tab-container::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 6px;
+            width: calc(50% - 6px);
+            height: calc(100% - 12px);
+            background-color: white;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .tab-container.manual::before {
+            transform: translateX(calc(100% + 6px));
+        }
+
+        .tab-content {
+            display: none;
+            padding: 16px;
+            background-color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: var(--transition);
+            height: 0;
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: block;
+            height: auto;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .direction-switch {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            background-color: var(--neutral-100);
+            padding: 4px;
+            border-radius: var(--radius-md);
+            position: relative;
+        }
+
+        .direction-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--neutral-600);
+            transition: var(--transition);
+            z-index: 1;
+            user-select: none;
+        }
+
+        .direction-btn.active {
+            color: var(--neutral-900);
+        }
+
+        /* Animated slider for direction */
+        .direction-switch::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background-color: white;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .direction-switch.countdown::before {
+            transform: translateX(calc(100% + 4px));
+        }
+
+        .counter-display {
+            font-size: 120px;
+            font-weight: 700;
+            text-align: center;
+            margin: 40px 0;
+            color: var(--neutral-900);
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: -0.025em;
+            line-height: 1.1;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .counter-display::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -20px;
+            width: 120px;
+            height: 6px;
+            background-color: var(--primary-light);
+            border-radius: 3px;
+            transform: translateX(-50%);
+            opacity: 0.5;
+        }
+
+        .counter-display.pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+                color: var(--primary);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .control-group {
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .control-group-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--neutral-600);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+        }
+
+        button:disabled {
+            background-color: var(--neutral-400);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        button.secondary {
+            background-color: white;
+            color: var(--neutral-700);
+            border: 1px solid var(--neutral-300);
+        }
+
+        button.secondary:hover:not(:disabled) {
+            background-color: var(--neutral-100);
+        }
+
+        button.accent {
+            background-color: var(--accent);
+        }
+
+        button.accent:hover:not(:disabled) {
+            background-color: var(--accent-dark);
+        }
+
+        button.danger {
+            background-color: var(--error);
+        }
+
+        button.danger:hover:not(:disabled) {
+            background-color: #DC2626;
+        }
+
+        .count-button {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .count-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: transform 0.6s, opacity 0.6s;
+        }
+
+        .count-button:active::after {
+            transform: translate(-50%, -50%) scale(3);
+            opacity: 0;
+            transition: 0s;
+        }
+
+        .minus-button {
+            background-color: var(--neutral-800);
+        }
+
+        .minus-button:hover:not(:disabled) {
+            background-color: var(--neutral-900);
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--neutral-700);
+            user-select: none;
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border: 2px solid var(--neutral-300);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 6px;
+            width: 6px;
+            height: 11px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        input[type="checkbox"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .sound-control {
+            display: flex;
+            align-items: center;
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            gap: 8px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            color: var(--neutral-900);
+            background-color: white;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 32px 12px 12px;
+            font-size: 15px;
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            color: var(--neutral-900);
+            background-color: white;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            appearance: none;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .input-group label {
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .custom-interval-container {
+            display: none;
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-top: 12px;
+            gap: 12px;
+            transition: var(--transition);
+        }
+
+        .custom-interval-container.active {
+            display: flex;
+        }
+
+        .countdown-settings {
+            display: none;
+            margin: 12px 0;
+            padding: 16px;
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .countdown-settings.active {
+            display: block;
+        }
+
+        .log {
+            margin-top: 24px;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: var(--radius-md);
+            background-color: white;
+            border: 1px solid var(--neutral-200);
+            box-shadow: var(--shadow-sm);
+            scrollbar-width: thin;
+            scrollbar-color: var(--neutral-300) var(--neutral-100);
+            font-size: 14px;
+        }
+
+        .log-title {
+            padding: 12px 16px;
+            background-color: var(--neutral-100);
+            border-bottom: 1px solid var(--neutral-200);
+            font-weight: 600;
+            color: var(--neutral-700);
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+        }
+
+        .log-content {
+            padding: 8px 0;
+        }
+
+        .log::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log::-webkit-scrollbar-track {
+            background: var(--neutral-100);
+            border-radius: 8px;
+        }
+
+        .log::-webkit-scrollbar-thumb {
+            background-color: var(--neutral-300);
+            border-radius: 8px;
+        }
+
+        .log-item {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--neutral-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .log-item:hover {
+            background-color: var(--neutral-50);
+        }
+
+        .log-item.new {
+            animation: highlightLogItem 2s forwards;
+        }
+
+        @keyframes highlightLogItem {
+            0% { background-color: var(--primary-light); }
+            100% { background-color: transparent; }
+        }
+
+        .count-number {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .time-stamp {
+            color: var(--neutral-500);
+            font-size: 12px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px 12px;
+            }
+
+            .counter-display {
+                font-size: 100px;
+                margin: 24px 0;
+                min-height: 130px;
+            }
+
+            button {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+
+            .count-button {
+                padding: 16px;
+                font-size: 16px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .input-group label {
+                margin-bottom: 4px;
+            }
+
+            .app-title {
+                font-size: 24px;
+            }
+        }
+
+        /* For accessibility focus states */
+        *:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Animation for interval effect */
+        .heartbeat {
+            animation: heartbeat 1s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        /* Dark mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #60A5FA;
+                --primary-dark: #3B82F6;
+                --primary-light: #93C5FD;
+                --accent: #22D3EE;
+                --accent-dark: #06B6D4;
+            }
+            
+            body {
+                background-color: var(--neutral-900);
+                color: var(--neutral-100);
+            }
+            
+            .app-title {
+                color: var(--neutral-100);
+            }
+            
+            .tab-container {
+                background-color: var(--neutral-800);
+            }
+            
+            .tab {
+                color: var(--neutral-400);
+            }
+            
+            .tab.active {
+                color: var(--neutral-100);
+            }
+            
+            .tab-container::before {
+                background-color: var(--neutral-700);
+            }
+            
+            .tab-content {
+                background-color: var(--neutral-800);
+                box-shadow: var(--shadow-lg);
+            }
+            
+            .direction-switch {
+                background-color: var(--neutral-800);
+            }
+            
+            .direction-btn {
+                color: var(--neutral-400);
+            }
+            
+            .direction-btn.active {
+                color: var(--neutral-100);
+            }
+            
+            .direction-switch::before {
+                background-color: var(--neutral-700);
+            }
+            
+            .counter-display {
+                color: var(--neutral-50);
+            }
+            
+            button.secondary {
+                background-color: var(--neutral-700);
+                color: var(--neutral-200);
+                border: 1px solid var(--neutral-600);
+            }
+            
+            button.secondary:hover:not(:disabled) {
+                background-color: var(--neutral-600);
+            }
+            
+            input[type="checkbox"] {
+                background-color: var(--neutral-700);
+                border-color: var(--neutral-600);
+            }
+            
+            .sound-control {
+                background-color: var(--neutral-800);
+            }
+            
+            input[type="number"], select {
+                background-color: var(--neutral-800);
+                border-color: var(--neutral-700);
+                color: var(--neutral-200);
+            }
+            
+            .custom-interval-container, .countdown-settings {
+                background-color: var(--neutral-800);
+            }
+            
+            .log {
+                background-color: var(--neutral-800);
+                border-color: var(--neutral-700);
+            }
+            
+            .log-title {
+                background-color: var(--neutral-800);
+                border-color: var(--neutral-700);
+                color: var(--neutral-300);
+            }
+            
+            .log-item {
+                border-color: var(--neutral-700);
+            }
+            
+            .log-item:hover {
+                background-color: var(--neutral-700);
+            }
+            
+            .time-stamp {
+                color: var(--neutral-400);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="app-title" data-i18n="title">Counter</h1>
+            <select id="language-selector" class="language-selector">
+                <option value="en">English</option>
+                <option value="de">Deutsch</option>
+                <option value="fr">Français</option>
+                <option value="it">Italiano</option>
+            </select>
+        </div>
+        
+        <div class="tab-container" id="tab-container">
+            <div class="tab active" id="tab-auto" data-i18n="autoCount" role="tab" aria-selected="true">Automatic</div>
+            <div class="tab" id="tab-manual" data-i18n="manualCount" role="tab" aria-selected="false">Manual</div>
+        </div>
+        
+        <div class="tab-content active" id="content-auto" role="tabpanel">
+            <div class="direction-switch" id="direction-switch" role="radiogroup" aria-label="Counting direction">
+                <span class="direction-btn active" id="auto-count-up" role="radio" aria-checked="true" tabindex="0" data-i18n="countUp">Count Up</span>
+                <span class="direction-btn" id="auto-count-down" role="radio" aria-checked="false" tabindex="0" data-i18n="countDown">Count Down</span>
+            </div>
+            
+            <div class="countdown-settings" id="countdown-settings">
+                <div class="input-group">
+                    <label for="countdown-start" data-i18n="startFrom">Start from:</label>
+                    <input type="number" id="countdown-start" min="1" value="10" aria-label="Countdown starting value">
+                </div>
+            </div>
+            
+            <div class="counter-display" id="auto-counter" aria-live="polite" aria-label="Current count">0</div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <div class="control-group-title" data-i18n="interval">Interval</div>
+                    <div class="control-row">
+                        <select id="interval-preset" class="full-width" aria-label="Select counting interval">
+                            <option value="1000" data-i18n="1sec">Every 1 second</option>
+                            <option value="2000" data-i8n="2sec">Every 2 seconds</option>
+                            <option value="custom" data-i18n="customInterval">Custom interval</option>
+                        </select>
+                    </div>
+                    
+                    <div class="custom-interval-container" id="custom-interval-container">
+                        <input type="number" id="custom-interval-value" min="1" value="3" aria-label="Custom interval value">
+                        <select id="custom-interval-unit" aria-label="Custom interval unit">
+                            <option value="ms" data-i18n="milliseconds">Milliseconds</option>
+                            <option value="s" data-i18n="seconds" selected>Seconds</option>
+                            <option value="m" data-i18n="minutes">Minutes</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-group-title" data-i18n="options">Options</div>
+                    <div class="control-row">
+                        <div class="sound-control">
+                            <input type="checkbox" id="auto-sound" checked aria-label="Enable sound">
+                            <span data-i18n="beepSound">Play sound</span>
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <div class="input-group">
+                            <label for="auto-max-count" data-i18n="totalCount">Total count:</label>
+                            <input type="number" id="auto-max-count" min="0" value="0" placeholder="Unlimited" aria-label="Maximum count value">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                    <button id="auto-start" data-i18n="start">Start</button>
+                    <button id="auto-pause" disabled data-i18n="pause" class="secondary">Pause</button>
+                    <button id="auto-reset" data-i18n="reset" class="danger">Reset</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="content-manual" role="tabpanel">
+            <div class="counter-display" id="manual-counter" aria-live="polite" aria-label="Current count">0</div>
+            
+            <div class="controls">
+                <button id="manual-count" class="count-button accent" data-i18n="clickOrPress">Click here or press SPACE to count (+1)</button>
+                <button id="manual-minus" class="count-button minus-button" data-i18n="minus">-</button>
+                
+                <div class="control-row">
+                    <div class="sound-control">
+                        <input type="checkbox" id="manual-sound" checked aria-label="Enable sound">
+                        <span data-i18n="beepSound">Play sound</span>
+                    </div>
+                    <button id="manual-reset" data-i18n="reset" class="danger">Reset</button>
+                </div>
+                
+                <div class="log" id="manual-log-container">
+                    <div class="log-title" data-i18n="countLog">Count Log</div>
+                    <div class="log-content" id="manual-log"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(function(registration) {
+                console.log('ServiceWorker registration successful');
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        }
+        
+        // Audio element
+        const beepSound = new Audio('data:audio/wav;base64,UklGRlwJAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YTgJAACAgICAgICAgICAgICAgICAgICAgICAgICAAICBg4OGiIiIhYKAfXt4enl7e3+BgYKDhIWHh4iHhoWDgX15dXNwbm1ub3Fyd3h8fX6Afn99fHx7enp5eHl5enp8fXx9fHx7enl4d3Z1dXR0dXV1dnZ2dnV1dHRzcnFxcXBwcHBwcHFxcnJycXFwcG9ubm1tbGxsbGxtbW5ubm5ubm5ubm5tbW1tbW1tbW1tbm5ubm5ubm5ubm5tbW1tbW1tbW1tbm5ubm5ubm5ubm5tbW1tbW1tbW1tbm5ubm5ubm5ubm5ubW1tbW1tbW1tbW1ubm5ubm5ubm5ubW1tbW1tbW1tbW1ubm5ubm5ubm5ubW1tbW1tbW1tbW1ubm5ubm5ubm5ubW1tbW1tbW1tbW1ubm5ubm5ubm5ubW1tbW1tbW1tbW1tbm5ubm5ubm5tbW1tbW1tbW1tbW1ubm5ubm5ubm5ubW1tbW1tbW1tbW1tb29vb25ubm5ubW1tbG1tbGxsb29vb29vb25ubm1sa2tqbG1ubW5vb29vb25ubm5sa2tqbGxscHFydHV2d3d2dXRycXBubWxra2xtbnBxcnR1dnh4eHh3dnVzcnBubGtqa2xucHJ0dXd5enp7e3p5eHZ0c3FvbWtqaWptb3J0dnh6fH5/gIB/fn17eXd1c3Bta2loaGpscnV4e32AgoSFhoeGhYSCgHx5dnNvbGlnZmdqbnJ2e36BhYiLjY6PkI+OjImHhIB8eHRwbGlmZWZpbXF2e3+EiIyQk5aYmZqamJaTj4uHgn56dnJua2lnam1yeHyBho2Rlpqdm52enp6cm5eTjoqFgXx4dG9saWdnamxweHyChYuQlJicnqCioqKhnpuXkomEgHt2cW1pZmRkZmpweHyChYySlZqdoKKkpaWko6GdmJOOiIN+eXRva2dkY2RpbXN5foSKkJWbnqKlqKqqq6qopqKemJKMhn93c25pZWJhYWVqcXd9g4qQlpyiqauurq+wsK+uqqWfmJGJg3x2cGtmYl9eX2NobnV7gouSlp2jp6uusLKysrKxrqulopuUjIV/eHJtaGRgXV1eY2pxeIGHjpWcpKqvs7a4uLm4t7WyraeflY2GeXRua2ZiXltbXWNqcHZ+hY2Um6OqsLW5vL6/v7++u7eyraWclY2Ef3hyamVgXFpZWmBnbnR8g4uTm6OqsLa6vcHCw8PCwL24s62kmZGJgXp0bWdgW1dWV15la3J6gYiRmKCosra7wMPFxsbGxcPAurepn5aNhX11bmhiXFdUVFpgZ296gYmQmKCosra7wMTHycrKycjFwLu0qqCXj4Z9d25oYlxWU1NXXWVsd3+HkJigrauzuL7DxsnLzMzLycbCu7Kpn5aPhn52bmhiXFZTUlVbY2pxeYGJkZmhqbG3vMLHyszOzs3MyMXAubGon5aOhX11bWdiW1VSUlZbY2pxeYGJkZmhqbG3vMLHyszOzs7Ny8jEv7ewpp6VjYR8dGxmYFpUUVFVW2Nqc3qCipKaoquzucDFyczOz8/OzcnGwbm0q6OakYd/eHBoY11XU1JUWWBocHmAiJCZoauzvMHGyszO0NDPzcnGwbm0q6OakYd/eHBoY11XU1JUWWBocHmAiJCZoauzvMHGyszO0NDPzcnGwbm0q6OakYd/eHBoY11XU1JUWWBocHmAiJCZoauzvMHGyszO0NDPzcnGwbm0q6OakYd/eHBoY11XU1JUWWBob3d/h4+Xn6evt7zBxcnMzc7OzcvHw76zsKigenGpYmZgWlVSUlZbYmlweH+IkJigrLO5v8TJzM7Pz87MyMXAubGon5aOhX10bWdiW1VSUlVbY2pxeYGJkZmhqbG3vMLHyszOzs3MyMXAubGon5aOhX11bWdiW1ZTUlVbY2pxeYGJkZmgqbG3vMLHysvNzs3MyMXAubKpoJePhX11bmhjXFZTU1VbY2pxeYCIkJigqbG3vMLGysvNzczLyMXAubKpoJePhX11bmhjXFZTUlVbYmlweH+HkJegqrG3vcHGysvNzczLyMXAubKpoJePhX12bmhjXFZTU1VbYmlwd3+HkJegqrG3vcHGysvNzczLyMXAubKpoJePhX12bmhjXFZTU1VbYmlwd3+HkJegqrG3vcHGysvNzczLyMXAubKpoJePhX12bmhjXFZTU1VbYmlwd3+HkJegqrG3vcHGysvNzczLyMXAubKpoJePhX12bmhjXFZTU1VbYmlweH+HkJefqLG2vMHGysvNzczLyMbBurKpoJePhX12bmhjXFZTU1ZcY2pxeICIkJefqLC2vMDFycvNzc3LyMbBurOpn5aOhX11bWdiW1VSUlVbY2lweH+IkJefqLG2vMHGysvNzczLyMbBurOpn5aOhX11bWdiW1VSUlVbY2lweH+IkJefqLG2vMHGysvNzczLyMbBurOpn5aOhX11bWdiW1VSUlVbY2lweH+HkJefqLG2vMHGysvNzczLyMbBurOpn5aOhX11bWdiW1VSUlVbY2pxeICIkJefqLG2vMHGyszNzc3LyMbBurOpoJePhX12bmhjXFZTU1VbY2pxeICIkJefqLG2vMHGyszNzc3LyMbBurOpoJePhX12bmhjXFZTU1ZcZGtyeYGJkZmgqbG3vMLHyszOzs3MyMXAubGon5aOhHx0bWZhW1VSUVRaYmlweICIkZmhqrK4vsPIy87Pz87MyMXAubGon5aOhHx0bGZhW1VSUVRaYWlweICIkZmhqrK4vcPIy87Pz87NycbBurOpoJePhX12bmhjXFZTU1VbY2pxeYCIkJegqbG3vMLHyszOzs3MyMXAubKpoJePhX12bmhjXFZTU1VbY2pxeYCIkJegqrG3vMLHyszOzs3MyMXAubKpoJePhX12bmhjXFZTU1VbY2pxeYCIkJegqrG3vMLHyszOzs3MyMXAubKpoJePhX12bmhkXVdUU1ZcZGpyeYGJkZigrLO5v8PJzM7Pz87MyMXAubGon5aOhX11bWdh');
+        
+        // Translations
+        const translations = {
+            'en': {
+                'title': 'Counter',
+                'autoCount': 'Automatic',
+                'manualCount': 'Manual',
+                '1sec': 'Every 1 second',
+                '2sec': 'Every 2 seconds',
+                'customInterval': 'Custom interval',
+                'milliseconds': 'Milliseconds',
+                'seconds': 'Seconds',
+                'minutes': 'Minutes',
+                'beepSound': 'Play sound',
+                'totalCount': 'Total count:',
+                'start': 'Start',
+                'pause': 'Pause',
+                'reset': 'Reset',
+                'minus': '-',
+                'clickOrPress': 'Click here or press SPACE to count (+1)',
+                'unlimited': 'Unlimited',
+                'countUp': 'Count Up',
+                'countDown': 'Count Down',
+                'startFrom': 'Start from:',
+                'countLog': 'Count Log',
+                'interval': 'Interval',
+                'options': 'Options'
+            },
+            'de': {
+                'title': 'Zähler',
+                'autoCount': 'Automatisch',
+                'manualCount': 'Manuell',
+                '1sec': 'Jede 1 Sekunde',
+                '2sec': 'Alle 2 Sekunden',
+                'customInterval': 'Benutzerdefiniertes Intervall',
+                'milliseconds': 'Millisekunden',
+                'seconds': 'Sekunden',
+                'minutes': 'Minuten',
+                'beepSound': 'Piepton',
+                'totalCount': 'Gesamtzahl:',
+                'start': 'Start',
+                'pause': 'Pause',
+                'reset': 'Zurücksetzen',
+                'minus': '-',
+                'clickOrPress': 'Hier klicken oder LEERTASTE drücken zum Zählen (+1)',
+                'unlimited': 'Unbegrenzt',
+                'countUp': 'Zählen',
+                'countDown': 'Abzählen',
+                'startFrom': 'Start von:',
+                'countLog': 'Zählprotokoll',
+                'interval': 'Intervall',
+                'options': 'Optionen'
+            },
+            'fr': {
+                'title': 'Compteur',
+                'autoCount': 'Automatique',
+                'manualCount': 'Manuel',
+                '1sec': 'Chaque 1 seconde',
+                '2sec': 'Toutes les 2 secondes',
+                'customInterval': 'Intervalle personnalisé',
+                'milliseconds': 'Millisecondes',
+                'seconds': 'Secondes',
+                'minutes': 'Minutes',
+                'beepSound': 'Bip sonore',
+                'totalCount': 'Nombre total:',
+                'start': 'Démarrer',
+                'pause': 'Pause',
+                'reset': 'Réinitialiser',
+                'minus': '-',
+                'clickOrPress': 'Cliquez ici ou appuyez sur ESPACE pour compter (+1)',
+                'unlimited': 'Illimité',
+                'countUp': 'Compter',
+                'countDown': 'Décompter',
+                'startFrom': 'Commencer à partir de:',
+                'countLog': 'Journal de comptage',
+                'interval': 'Intervalle',
+                'options': 'Options'
+            },
+            'it': {
+                'title': 'Contatore',
+                'autoCount': 'Automatico',
+                'manualCount': 'Manuale',
+                '1sec': 'Ogni 1 secondo',
+                '2sec': 'Ogni 2 secondi',
+                'customInterval': 'Intervallo personalizzato',
+                'milliseconds': 'Millisecondi',
+                'seconds': 'Secondi',
+                'minutes': 'Minuti',
+                'beepSound': 'Riproduci suono',
+                'totalCount': 'Conteggio totale:',
+                'start': 'Avvia',
+                'pause': 'Pausa',
+                'reset': 'Azzera',
+                'minus': '-',
+                'clickOrPress': 'Clicca qui o premi SPAZIO per contare (+1)',
+                'unlimited': 'Illimitato',
+                'countUp': 'Contare',
+                'countDown': 'Decontare',
+                'startFrom': 'Iniziare da:',
+                'countLog': 'Registro conteggi',
+                'interval': 'Intervallo',
+                'options': 'Opzioni'
+            }
+        };
+        
+        // Set current language
+        let currentLang = 'en';
+        
+        // Update translations
+        function updateTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    if (el.tagName === 'INPUT' && el.getAttribute('placeholder')) {
+                        el.setAttribute('placeholder', translations[currentLang][key]);
+                    } else {
+                        el.textContent = translations[currentLang][key];
+                    }
+                }
+            });
+        }
+        
+        // Language selector
+        document.getElementById('language-selector').addEventListener('change', function() {
+            currentLang = this.value;
+            updateTranslations();
+        });
+        
+        // Initialize translations
+        updateTranslations();
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                
+                const contentId = 'content-' + tab.id.split('-')[1];
+                document.getElementById(contentId).classList.add('active');
+                
+                // Update tab slider position
+                document.getElementById('tab-container').classList.toggle('manual', tab.id === 'tab-manual');
+            });
+            
+            // Keyboard navigation for tabs
+            tab.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    tab.click();
+                }
+            });
+        });
+        
+        // Custom interval toggle
+        document.getElementById('interval-preset').addEventListener('change', function() {
+            const customIntervalContainer = document.getElementById('custom-interval-container');
+            
+            if (this.value === 'custom') {
+                customIntervalContainer.classList.add('active');
+                customIntervalContainer.style.display = 'flex';
+            } else {
+                customIntervalContainer.classList.remove('active');
+                customIntervalContainer.style.display = 'none';
+            }
+        });
+
+        // Automatic counting mode
+        let autoCounter = 0;
+        let autoInterval = null;
+        let isCountingUp = true;
+        const autoCounterDisplay = document.getElementById('auto-counter');
+        const autoStartBtn = document.getElementById('auto-start');
+        const autoPauseBtn = document.getElementById('auto-pause');
+        const autoResetBtn = document.getElementById('auto-reset');
+        const autoSoundCheckbox = document.getElementById('auto-sound');
+        const autoMaxCountInput = document.getElementById('auto-max-count');
+        const intervalPresetSelect = document.getElementById('interval-preset');
+        const customIntervalValue = document.getElementById('custom-interval-value');
+        const customIntervalUnit = document.getElementById('custom-interval-unit');
+        const autoCountUpBtn = document.getElementById('auto-count-up');
+        const autoCountDownBtn = document.getElementById('auto-count-down');
+        const countdownSettings = document.getElementById('countdown-settings');
+        const countdownStartInput = document.getElementById('countdown-start');
+        const directionSwitch = document.getElementById('direction-switch');
+
+        // Set default values
+        autoMaxCountInput.value = "0"; // Unlimited by default
+        autoSoundCheckbox.checked = true; // Sound enabled by default
+
+        // Direction switch for auto counter
+        autoCountUpBtn.addEventListener('click', () => {
+            if (isCountingUp) return;
+            
+            isCountingUp = true;
+            directionSwitch.classList.remove('countdown');
+            autoCountUpBtn.classList.add('active');
+            autoCountDownBtn.classList.remove('active');
+            autoCountUpBtn.setAttribute('aria-checked', 'true');
+            autoCountDownBtn.setAttribute('aria-checked', 'false');
+            countdownSettings.classList.remove('active');
+            autoMaxCountInput.value = "0"; // Reset to unlimited for count up
+        });
+
+        autoCountDownBtn.addEventListener('click', () => {
+            if (!isCountingUp) return;
+            
+            isCountingUp = false;
+            directionSwitch.classList.add('countdown');
+            autoCountDownBtn.classList.add('active');
+            autoCountUpBtn.classList.remove('active');
+            autoCountDownBtn.setAttribute('aria-checked', 'true');
+            autoCountUpBtn.setAttribute('aria-checked', 'false');
+            countdownSettings.classList.add('active');
+            // Set the counter to the start value
+            autoCounter = parseInt(countdownStartInput.value) || 10;
+            autoCounterDisplay.textContent = autoCounter;
+        });
+
+        // Keyboard handling for direction buttons
+        autoCountUpBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                autoCountUpBtn.click();
+            }
+        });
+
+        autoCountDownBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                autoCountDownBtn.click();
+            }
+        });
+
+        // Update counter when countdown start value changes
+        countdownStartInput.addEventListener('change', () => {
+            if (!isCountingUp) {
+                autoCounter = parseInt(countdownStartInput.value) || 10;
+                autoCounterDisplay.textContent = autoCounter;
+            }
+        });
+
+        // Pulse animation for counter
+        function pulseCounter(counterElement) {
+            counterElement.classList.add('pulse');
+            setTimeout(() => {
+                counterElement.classList.remove('pulse');
+            }, 500);
+        }
+
+        autoStartBtn.addEventListener('click', () => {
+            if (autoInterval) return;
+            
+            const interval = getIntervalInMilliseconds();
+            
+            // Add subtle animation to show counting is active
+            autoCounterDisplay.classList.add('heartbeat');
+            
+            autoInterval = setInterval(() => {
+                if (isCountingUp) {
+                    autoCounter++;
+                } else {
+                    if (autoCounter > 0) {
+                        autoCounter--;
+                    }
+                    if (autoCounter === 0) {
+                        clearInterval(autoInterval);
+                        autoInterval = null;
+                        autoStartBtn.disabled = false;
+                        autoPauseBtn.disabled = true;
+                        autoCounterDisplay.classList.remove('heartbeat');
+                        if (autoSoundCheckbox.checked) {
+                            beepSound.currentTime = 0;
+                            beepSound.play().catch(() => {});
+                        }
+                        pulseCounter(autoCounterDisplay);
+                        return;
+                    }
+                }
+                autoCounterDisplay.textContent = autoCounter;
+                
+                if (autoSoundCheckbox.checked) {
+                    beepSound.currentTime = 0;
+                    beepSound.play().catch(() => {});
+                }
+                
+                pulseCounter(autoCounterDisplay);
+                
+                const maxCount = parseInt(autoMaxCountInput.value);
+                if (maxCount > 0 && autoCounter >= maxCount) {
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                    autoStartBtn.disabled = false;
+                    autoPauseBtn.disabled = true;
+                    autoCounterDisplay.classList.remove('heartbeat');
+                }
+            }, interval);
+            
+            autoStartBtn.disabled = true;
+            autoPauseBtn.disabled = false;
+        });
+
+        autoPauseBtn.addEventListener('click', () => {
+            clearInterval(autoInterval);
+            autoInterval = null;
+            autoStartBtn.disabled = false;
+            autoPauseBtn.disabled = true;
+            autoCounterDisplay.classList.remove('heartbeat');
+        });
+
+        autoResetBtn.addEventListener('click', () => {
+            clearInterval(autoInterval);
+            autoInterval = null;
+            
+            if (isCountingUp) {
+                autoCounter = 0;
+            } else {
+                autoCounter = parseInt(countdownStartInput.value) || 10;
+            }
+            
+            autoCounterDisplay.textContent = autoCounter;
+            autoStartBtn.disabled = false;
+            autoPauseBtn.disabled = true;
+            autoCounterDisplay.classList.remove('heartbeat');
+            
+            // Add reset animation
+            autoCounterDisplay.classList.add('pulse');
+            setTimeout(() => {
+                autoCounterDisplay.classList.remove('pulse');
+            }, 500);
+        });
+
+        // Get interval in milliseconds
+        function getIntervalInMilliseconds() {
+            if (intervalPresetSelect.value !== 'custom') {
+                return parseInt(intervalPresetSelect.value);
+            }
+            
+            const value = parseInt(customIntervalValue.value) || 1;
+            const unit = customIntervalUnit.value;
+            
+            switch (unit) {
+                case 'ms':
+                    return value;
+                case 's':
+                    return value * 1000;
+                case 'm':
+                    return value * 60 * 1000;
+                default:
+                    return 1000;
+            }
+        }
+
+        // Manual counting mode
+        let manualCounter = 0;
+        const manualCounterDisplay = document.getElementById('manual-counter');
+        const manualCountBtn = document.getElementById('manual-count');
+        const manualMinusBtn = document.getElementById('manual-minus');
+        const manualResetBtn = document.getElementById('manual-reset');
+        const manualSoundCheckbox = document.getElementById('manual-sound');
+        const manualLog = document.getElementById('manual-log');
+
+        function updateManualCounter(increment) {
+            if (increment) {
+                manualCounter++;
+            } else {
+                if (manualCounter > 0) {
+                    manualCounter--;
+                }
+            }
+            manualCounterDisplay.textContent = manualCounter;
+            
+            if (manualSoundCheckbox.checked) {
+                beepSound.currentTime = 0;
+                beepSound.play().catch(() => {});
+            }
+            
+            pulseCounter(manualCounterDisplay);
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item new';
+            logItem.innerHTML = `
+                <span class="count-number">${increment ? '+' : '-'}1 → ${manualCounter}</span>
+                <span class="time-stamp">${timeString}</span>
+            `;
+            manualLog.prepend(logItem);
+            
+            // Remove 'new' class after animation completes
+            setTimeout(() => {
+                logItem.classList.remove('new');
+            }, 2000);
+        }
+
+        manualCountBtn.addEventListener('click', () => updateManualCounter(true));
+        manualMinusBtn.addEventListener('click', () => updateManualCounter(false));
+        
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('content-manual').classList.contains('active')) {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    updateManualCounter(true);
+                    
+                    // Add pressed effect to button
+                    manualCountBtn.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        manualCountBtn.style.transform = '';
+                    }, 100);
+                } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+                    e.preventDefault();
+                    updateManualCounter(false);
+                    
+                    // Add pressed effect to button
+                    manualMinusBtn.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        manualMinusBtn.style.transform = '';
+                    }, 100);
+                }
+            }
+        });
+
+        manualResetBtn.addEventListener('click', () => {
+            manualCounter = 0;
+            manualCounterDisplay.textContent = manualCounter;
+            manualLog.innerHTML = '';
+            
+            // Add reset animation
+            manualCounterDisplay.classList.add('pulse');
+            setTimeout(() => {
+                manualCounterDisplay.classList.remove('pulse');
+            }, 500);
+        });
+        
+        // Add tactile feedback to buttons using vibration API if available
+        function vibrateIfPossible(duration = 20) {
+            if (navigator.vibrate) {
+                navigator.vibrate(duration);
+            }
+        }
+        
+        // Add vibration to buttons
+        const allButtons = document.querySelectorAll('button');
+        allButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                vibrateIfPossible();
+            });
+        });
+        
+        // Add a countLog translation that wasn't in the original translations
+        translations.en.countLog = 'Count Log';
+        translations.de.countLog = 'Zählprotokoll';
+        translations.fr.countLog = 'Journal de comptage';
+        translations.it.countLog = 'Registro conteggi';
+        
+        // Add interval and options translations
+        translations.en.interval = 'Interval';
+        translations.de.interval = 'Intervall';
+        translations.fr.interval = 'Intervalle';
+        translations.it.interval = 'Intervallo';
+        
+        translations.en.options = 'Options';
+        translations.de.options = 'Optionen';
+        translations.fr.options = 'Options';
+        translations.it.options = 'Opzioni';
+    </script>
+    
+    <!-- PWA Service Worker -->
+    <script id="sw-js" type="text/javascript">
+    // This is an inline service worker code, in production it should be a separate sw.js file
+    self.addEventListener('install', function(event) {
+        event.waitUntil(
+            caches.open('counter-app-v1').then(function(cache) {
+                return cache.addAll([
+                    './'
+                ]);
+            })
+        );
+    });
+    
+    self.addEventListener('fetch', function(event) {
+        event.respondWith(
+            caches.match(event.request).then(function(response) {
+                return response || fetch(event.request);
+            })
+        );
+    });
+    </script>
+</body>
+</html>
